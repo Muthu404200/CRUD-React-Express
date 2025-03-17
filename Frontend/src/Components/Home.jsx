@@ -42,12 +42,14 @@ function Home() {
     };
 
     const delItem = (id) => {
-        axios
-            .delete(`http://localhost:8086/api/${id}`)
-            .then(() => setItem(item.filter((list) => list._id !== id)))
-            .catch((err) => {
-                console.log(err);
-            });
+        if (window.confirm("Are you sure you want to delete this item?")) {
+            axios
+                .delete(`http://localhost:8086/api/${id}`)
+                .then(() => setItem(item.filter((list) => list._id !== id)))
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
     };
 
     const editItem = (id) => {
@@ -58,6 +60,11 @@ function Home() {
             email: itemToEdit.email,
         });
         setEditingId(id); // Set editing mode on
+    };
+
+    const cancelEdit = () => {
+        setData({ name: '', age: '', email: '' });
+        setEditingId(null);
     };
 
     return (
@@ -85,8 +92,13 @@ function Home() {
                     onChange={(e) => setData({ ...data, email: e.target.value })}
                 />
                 <button onClick={addItem}>
-                    {editingId ? 'Update' : 'Add'} {/* Change button text based on mode */}
+                    {editingId ? 'Update' : 'Add'}
                 </button>
+                {editingId && (
+                    <button onClick={cancelEdit}>
+                        Cancel
+                    </button>
+                )}
             </div>
 
             <div className="content-box">
@@ -101,7 +113,7 @@ function Home() {
                     </thead>
                     <tbody>
                         {item.map((items) => (
-                            <tr key={items._id}>
+                            <tr key={items._id} style={{ backgroundColor: editingId === items._id ? '#f0f0f0' : '' }}>
                                 <td>{items.name}</td>
                                 <td>{items.age}</td>
                                 <td>{items.email}</td>
@@ -109,8 +121,10 @@ function Home() {
                                     <button onClick={() => editItem(items._id)}>
                                         Edit
                                     </button>
+                                </td>
+                                <td>
                                     <button onClick={() => delItem(items._id)}>
-                                        Del
+                                        Delete
                                     </button>
                                 </td>
                             </tr>
